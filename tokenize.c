@@ -1,31 +1,14 @@
 ///
 /// File:  tokenize.c
-/// Description:  TODO: DESC
+/// Description:  Takes in a transition matrix from the terminal, then input text from the standard input and finds
+///               the tokens within the text
 ///
 /// @author ljc5423@rit.edu
 ///
 
-
-#include "classes.h"
+#include <string.h>
 #include "tokenize.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
-void buildTM(FILE* file) {
-    // Print File contents
-    char *ptr, buf[BUFLEN];
-
-    while((ptr = fgets(buf, BUFLEN, file)) != NULL) {
-        if (*ptr == '#') {
-            continue;
-        }
-        printf(ptr);
-    }
-}
-
-/// TODO: Description
-/// @return EXIT_SUCCESS or EXIT_FAILURE on error
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         fprintf(stderr, USAGE_STRING);
@@ -39,8 +22,22 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    buildTM(file);
+    scannerStateMachine* scanner = buildScanner(file);
     fclose(file);
 
+    while (feof(stdin) == 0) {
+        scanForToken(scanner);
+        if (scanner->state == -1) {
+            printf("rejected\n");
+        } else {
+            if (scanner->buffer[0] != '\0') {
+                printf("recognized '%s'\n", scanner->buffer);
+            }
+        }
+        strcpy(scanner->buffer, "");
+    }
+    printf("EOF\n");
+
+    freeScanner(scanner);
     return EXIT_SUCCESS;
 }
